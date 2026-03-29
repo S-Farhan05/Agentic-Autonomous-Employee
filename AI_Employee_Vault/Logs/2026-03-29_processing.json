@@ -1,0 +1,32 @@
+{
+  "timestamp": "2026-03-29T16:15:00Z",
+  "session": "bronze_tier_demo",
+  "tasks_processed": [
+    {
+      "task_id": "EXAMPLE_welcome_task",
+      "type": "example_task",
+      "priority": "medium",
+      "action_taken": "reviewed_and_archived",
+      "approval_required": false,
+      "result": "success",
+      "notes": "Example task completed - demonstrates basic workflow"
+    },
+    {
+      "task_id": "FILE_Untitled",
+      "type": "file_drop",
+      "priority": "medium",
+      "original_file": "Untitled.md",
+      "file_size": "0.00 KB",
+      "action_taken": "reviewed_and_archived",
+      "approval_required": false,
+      "result": "success",
+      "notes": "Empty markdown file - no content to process"
+    }
+  ],
+  "summary": {
+    "total_processed": 2,
+    "auto_approved": 2,
+    "requires_approval": 0,
+    "errors": 0
+  }
+}

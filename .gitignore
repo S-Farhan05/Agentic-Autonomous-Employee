@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+.venv/
+ENV/
+env/
+
+# Logs
+*.log
+AI_Employee_Vault/Logs/*.log
+
+# Obsidian
+.obsidian/
+
+# Environment variables
+.env
+.env.local
+
+# Credentials
+credentials.json
+token.json
+*.key
+*.pem
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Temporary files
+*.tmp
+~*
+.~*
+
+# Sensitive vault folders (optional - uncomment if needed)
+# AI_Employee_Vault/Pending_Approval/
+# AI_Employee_Vault/Approved/
