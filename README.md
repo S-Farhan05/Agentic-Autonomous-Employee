@@ -1,194 +1,292 @@
-"# AI Employee - Bronze Tier Implementation
+# AI Employee - Silver Tier Implementation
 
-A local-first Personal AI Employee built with Claude Code and Obsidian. This Bronze Tier implementation provides the foundational infrastructure for autonomous task processing.
+**A local-first Personal AI Employee built with Qwen Code and Obsidian**
 
-## Overview
+This Silver Tier implementation provides autonomous email and social media automation with human-in-the-loop approval workflow.
 
-This project implements the Bronze Tier requirements from the Personal AI Employee Hackathon:
-- ✅ Obsidian vault with Dashboard.md and Company_Handbook.md
-- ✅ File system watcher for monitoring drop folder
-- ✅ Claude Code integration for reading/writing to vault
-- ✅ Basic folder structure: /Inbox, /Needs_Action, /Done
-- ✅ Agent Skill for task processing
+## 🎯 Tier Status
 
-## Architecture
+| Tier | Status | Description |
+|------|--------|-------------|
+| 🥉 Bronze | ✅ **Complete** | Foundation, file watcher, task processing |
+| 🥈 Silver | ✅ **Complete** | Gmail automation, LinkedIn posting, approval workflow |
+| 🥇 Gold | ⏳ Pending | Odoo integration, multi-domain automation |
+| 💎 Platinum | ⏳ Pending | Cloud deployment, always-on operation |
+
+## ✨ What's Working
+
+### 📧 Gmail Automation
+- ✅ Gmail Watcher detects new emails (2-min intervals)
+- ✅ Filters promotional/security emails automatically
+- ✅ Creates tasks in `Needs_Action/` folder
+- ✅ Qwen Code processes and creates approval requests
+- ✅ Human-in-the-loop approval workflow
+- ✅ Sends emails via Gmail API (OAuth2 authenticated)
+
+### 💼 LinkedIn Automation
+- ✅ Auto-posts to LinkedIn about business topics
+- ✅ Professional content generation
+- ✅ Approval workflow before posting
+
+### 🤖 Autonomous Processing
+- ✅ Continuous Processor runs every 2 minutes
+- ✅ Qwen Code as the reasoning engine
+- ✅ Company Handbook rules for decision-making
+- ✅ Dashboard updates automatically
+
+## 🏗️ Architecture
 
 ```
-┌─────────────────────────────────────────┐
-│         External Input (Files)          │
-└──────────────────┬──────────────────────┘
-                   │
-                   ▼
-┌─────────────────────────────────────────┐
-│      File System Watcher (Python)       │
-│  Monitors: AI_Employee_Vault/Inbox/     │
-└──────────────────┬──────────────────────┘
-                   │
-                   ▼
-┌─────────────────────────────────────────┐
-│         Obsidian Vault (Local)          │
-│  /Inbox → /Needs_Action → /Done         │
-│  Dashboard.md | Company_Handbook.md     │
-└──────────────────┬──────────────────────┘
-                   │
-                   ▼
-┌─────────────────────────────────────────┐
-│      Claude Code (Reasoning Engine)     │
-│  Skill: /process-tasks                  │
-│  Read → Analyze → Act → Update          │
-└─────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│                    EXTERNAL SOURCES                             │
+│         Gmail                    LinkedIn          File Drops   │
+└──────────┬────────────────────────┬──────────────────┬──────────┘
+           │                        │                  │
+           ▼                        ▼                  ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                    PERCEPTION LAYER (Watchers)                  │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐          │
+│  │ Gmail Watcher│  │LinkedIn Poster│ │File Watcher  │          │
+│  │  (2 min)     │  │  (on demand)  │ │  (on event)  │          │
+│  └──────┬───────┘  └──────────────┘  └──────┬───────┘          │
+└─────────┼────────────────────────────────────┼──────────────────┘
+          │                                    │
+          ▼                                    ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                    OBSIDIAN VAULT (Local Memory)                │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │ /Needs_Action/  →  /Pending_Approval/  →  /Approved/     │  │
+│  │ /Done/  │  /Plans/  │  /Logs/  │  Dashboard.md           │  │
+│  └──────────────────────────────────────────────────────────┘  │
+└────────────────────────────────┬────────────────────────────────┘
+                                 │
+                                 ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                    REASONING LAYER (Qwen Code)                  │
+│   Continuous Processor (every 2 min) invokes Qwen Code          │
+│   Read → Think → Plan → Create Approvals → Update Dashboard     │
+└────────────────────────────────┬────────────────────────────────┘
+                                 │
+                                 ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                    ACTION LAYER                                 │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐          │
+│  │Gmail API     │  │LinkedIn API  │  │File System   │          │
+│  │(send email)  │  │(post update) │  │(move files)  │          │
+│  └──────────────┘  └──────────────┘  └──────────────┘          │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
-## Prerequisites
+## 📁 Project Structure
+
+```
+Agentic-Autonomous-Employee/
+├── AI_Employee_Vault/          # Obsidian vault (memory)
+│   ├── Inbox/                  # File drop zone
+│   ├── Needs_Action/           # Tasks waiting for processing
+│   ├── Pending_Approval/       # Awaiting human approval
+│   ├── Approved/               # Ready to execute
+│   ├── Done/                   # Completed tasks
+│   ├── Dashboard.md            # Real-time status
+│   └── Company_Handbook.md     # AI behavior rules
+├── watchers/                   # Perception layer
+│   ├── gmail_watcher.py        # Gmail monitoring
+│   ├── filesystem_watcher.py   # File drop monitoring
+│   └── base_watcher.py         # Base class
+├── scripts/                    # Core logic
+│   ├── continuous_processor.py # Invokes Qwen every 2 min
+│   ├── create_email_approval.py # Creates approval requests
+│   ├── send_approved_email.py  # Sends emails via Gmail API
+│   ├── linkedin_poster.py      # LinkedIn posting
+│   └── gmail_auth.py           # OAuth authentication
+├── mcp-servers/                # Future: MCP integration
+├── credentials/                # OAuth tokens (gitignored)
+├── docs/                       # Documentation archive
+├── .qwen/                      # Qwen skills & config
+├── README.md                   # This file
+└── requirements.txt            # Python dependencies
+```
+
+## 🚀 Quick Start
+
+### Prerequisites
 
 - **Python**: 3.13 or higher
-- **Claude Code**: Active subscription or free tier
-- **Obsidian**: v1.10.6+ (optional, for GUI viewing)
+- **Qwen Code**: Installed and configured
+- **Obsidian**: Optional (for GUI viewing)
+- **Gmail API**: OAuth credentials in `credentials/`
 
-## Installation
-
-### 1. Navigate to Project Directory
+### Installation
 
 ```bash
 cd E:\Farhan-work\Hackathon\Agentic-Autonomous-Employee
-```
-
-### 2. Install Python Dependencies
-
-```bash
 pip install -r requirements.txt
 ```
 
-### 3. Verify Folder Structure
+### Start Automation
 
-The following structure should exist:
-```
-AI_Employee_Vault/
-├── Inbox/              # Drop files here to trigger processing
-├── Needs_Action/       # Tasks waiting to be processed
-├── Done/               # Completed tasks
-├── Plans/              # Multi-step task plans
-├── Logs/               # System logs
-├── Pending_Approval/   # Tasks requiring human approval
-├── Approved/           # Approved tasks ready for execution
-├── Rejected/           # Rejected tasks
-├── Dashboard.md        # Main status dashboard
-└── Company_Handbook.md # AI behavior rules
+**Terminal 1 - Gmail Watcher:**
+```bash
+python watchers/gmail_watcher.py
 ```
 
-## Usage
+**Terminal 2 - Continuous Processor:**
+```bash
+python scripts/continuous_processor.py
+```
 
-### Starting the File System Watcher
+### Test the System
 
-The watcher monitors the Inbox folder and creates action files when new files are dropped.
+1. **Send a test email** to your Gmail address
+2. **Wait 2 minutes** - Gmail Watcher detects it
+3. **Wait 2 more minutes** - Continuous Processor invokes Qwen
+4. **Check `Pending_Approval/`** - Approval request created
+5. **Move to `Approved/`** - You approve the action
+6. **Wait 2 minutes** - Email sent via Gmail API
+7. **Check `Done/`** - Task completed
+
+## 📊 Workflow Example
+
+### Email Processing Flow
+
+```
+1. Email arrives → Gmail Watcher (2 min)
+                      ↓
+2. Task created → Needs_Action/EMAIL_*.md
+                      ↓
+3. Continuous Processor (2 min) → Invokes Qwen Code
+                      ↓
+4. Qwen reads Company_Handbook.md → Creates approval request
+                      ↓
+5. Approval in Pending_Approval/ → Waits for human
+                      ↓
+6. You move to Approved/ → Human approval
+                      ↓
+7. Next cycle → Qwen executes send_approved_email.py
+                      ↓
+8. Email sent via Gmail API → Moved to Done/
+```
+
+## ⚙️ Configuration
+
+### Processing Interval
+
+Default: **120 seconds (2 minutes)**
 
 ```bash
-# Start the watcher
-python watchers/filesystem_watcher.py
+# Custom interval (in seconds)
+python scripts/continuous_processor.py <vault_path> <interval_seconds>
+
+# Example: 5 minute intervals
+python scripts/continuous_processor.py AI_Employee_Vault 300
 ```
 
-The watcher will:
-1. Monitor `AI_Employee_Vault/Inbox/` for new files
-2. Copy files to `Needs_Action/` with `FILE_` prefix
-3. Create metadata `.md` files describing each file
-4. Log all activities to `Logs/filesystem_watcher.log`
+### Gmail Filtering
 
-### Processing Tasks with Claude Code
+Edit `watchers/gmail_watcher.py` to customize:
 
-Once files are in the Needs_Action folder, use Claude Code to process them:
-
-```bash
-# Start Claude Code
-claude
-
-# In Claude Code, run the skill
-/process-tasks
+```python
+# Emails to ignore
+ignore_senders = ['noreply', 'security', 'linkedin', 'amazon']
+ignore_subjects = ['PIN', 'verification', 'promo', 'newsletter']
 ```
 
-Claude will:
-1. Read Company_Handbook.md for rules
-2. Process all tasks in Needs_Action/
-3. Execute auto-approved actions
-4. Create approval requests for sensitive actions
-5. Update Dashboard.md
-6. Move completed tasks to Done/
+### AI Behavior Rules
 
-### Viewing the Dashboard
+Edit `AI_Employee_Vault/Company_Handbook.md`:
 
-Open `AI_Employee_Vault/Dashboard.md` in:
-- **Obsidian**: For rich markdown viewing with links
-- **Any text editor**: For quick status checks
-- **Claude Code**: Ask Claude to read and summarize it
-
-## Testing the System
-
-### Test 1: File Drop
-
-1. Start the watcher:
-   ```bash
-   python watchers/filesystem_watcher.py
-   ```
-
-2. Drop a test file into `AI_Employee_Vault/Inbox/`:
-   ```bash
-   echo "Test document content" > AI_Employee_Vault/Inbox/test.txt
-   ```
-
-3. Check `Needs_Action/` for the created files
-
-### Test 2: Task Processing
-
-1. Ensure test files are in `Needs_Action/`
-2. Run Claude Code and execute `/process-tasks`
-3. Check Dashboard.md for updates
-
-## Configuration
-
-### Customizing AI Behavior
-
-Edit `AI_Employee_Vault/Company_Handbook.md` to:
-- Add new rules
-- Change priority levels
-- Modify approval thresholds
+- Add new decision rules
+- Change approval thresholds
+- Modify priority levels
 - Define working hours
 
-## Troubleshooting
+## 🛠️ Commands
 
-### Watcher Not Starting
+### Monitor Folders
 
-**Error**: `ModuleNotFoundError: No module named 'watchdog'`
-
-**Solution**: Install dependencies
 ```bash
-pip install watchdog
+# Check pending tasks
+dir AI_Employee_Vault\Needs_Action\*.md
+
+# Check approvals waiting
+dir AI_Employee_Vault\Pending_Approval\*.md
+
+# Check ready to execute
+dir AI_Employee_Vault\Approved\*.md
 ```
 
-### Files Not Being Detected
+### View Logs
 
-**Check**:
-1. Watcher is running (check console output)
-2. Files are in correct folder (`Inbox/`)
-3. Files are not hidden (don't start with `.` or `~`)
-4. Check logs: `AI_Employee_Vault/Logs/filesystem_watcher.log`
+```bash
+# Gmail Watcher logs
+type AI_Employee_Vault\Logs\gmail_watcher.log
 
-## Next Steps (Silver Tier)
+# Continuous Processor logs
+type AI_Employee_Vault\Logs\continuous_processor.log
 
-To upgrade to Silver Tier, add:
-- Gmail watcher for email monitoring
-- WhatsApp watcher for message monitoring
-- MCP server for sending emails
-- Human-in-the-loop approval workflow
-- Scheduling via cron/Task Scheduler
+# Email actions log
+type AI_Employee_Vault\Logs\email_actions.json
+```
 
-## Security Notes
+### Dashboard
 
-- All data stays local in the vault
-- No credentials stored in plain text
-- Logs contain audit trail of all actions
-- Human approval required for sensitive actions
+```bash
+# View current status
+type AI_Employee_Vault\Dashboard.md
+```
+
+## 📚 Documentation
+
+Full documentation is in the `docs/` folder:
+
+| Document | Description |
+|----------|-------------|
+| `docs/SILVER_TIER_COMPLETE.md` | Silver tier implementation details |
+| `docs/GMAIL_TESTING_GUIDE.md` | Gmail setup and testing guide |
+| `docs/EMAIL_WORKFLOW_COMPLETE.md` | Email workflow documentation |
+| `docs/QUICKSTART.md` | Quick start guide |
+| `docs/PROJECT_SUMMARY.md` | Project overview |
+
+## 🔒 Security
+
+- ✅ All data stays local in Obsidian vault
+- ✅ OAuth2 authentication for Gmail API
+- ✅ Credentials stored in `credentials/` (gitignored)
+- ✅ Human approval required for all external actions
+- ✅ Audit logs in `Logs/` folder
+- ✅ `.gitignore` prevents sensitive data commits
+
+## 🎯 Silver Tier Deliverables
+
+From the hackathon requirements:
+
+| Requirement | Status | Implementation |
+|-------------|--------|----------------|
+| All Bronze requirements | ✅ | Complete foundation |
+| 2+ Watcher scripts | ✅ | Gmail + File System |
+| LinkedIn auto-posting | ✅ | `linkedin_poster.py` |
+| Qwen reasoning loop | ✅ | `continuous_processor.py` |
+| MCP server for actions | ⚠️ | Using direct API (MCP reserved for Gold) |
+| Human-in-the-loop | ✅ | `Pending_Approval/` workflow |
+| Scheduling | ✅ | 2-minute intervals |
+| Agent Skills | ✅ | Qwen skills in `.qwen/skills/` |
+
+## 🔮 Next Steps (Gold Tier)
+
+- [ ] Odoo ERP integration via MCP
+- [ ] WhatsApp watcher for message monitoring
+- [ ] Weekly business audit with CEO briefing
+- [ ] Multiple MCP servers for different actions
+- [ ] Error recovery and graceful degradation
+
+## 🚀 Platinum Tier (Future)
+
+- [ ] Cloud VM deployment (24/7 operation)
+- [ ] Local/Cloud separation (Cloud drafts, Local approves)
+- [ ] Vault sync via Git
+- [ ] A2A agent communication
+- [ ] Facebook/Instagram/Twitter integration
 
 ---
 
-**Bronze Tier Status**: ✅ Complete
-
-Built with Claude Code | Powered by Anthropic" 
+**Built with Qwen Code** | **Silver Tier Complete** | **Local-First AI Employee**

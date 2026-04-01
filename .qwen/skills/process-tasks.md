@@ -39,22 +39,73 @@ When this skill is invoked:
 1. **Read the Company Handbook**
    - Load AI_Employee_Vault/Company_Handbook.md
    - Understand the rules and decision authority levels
+   - Key rule: NEVER send emails/messages without human approval
 
 2. **Check Needs_Action Folder**
    - Read all .md files in AI_Employee_Vault/Needs_Action/
    - Parse the frontmatter to understand task type and priority
+   - Focus on type: email files first
 
 3. **Process Each Task**
-   - Analyze the task content
-   - Determine if it requires approval (check Company_Handbook.md)
-   - For auto-approved tasks:
-     * Execute the action
-     * Log the result in Logs/
-     * Move to Done/
-   - For approval-required tasks:
-     * Create detailed approval request in Pending_Approval/
-     * Include all relevant context
-     * Wait for human to move to Approved/
+
+   **For EMAIL tasks (type: email):**
+   - Read the email content
+   - Determine if a reply is needed:
+     * Greeting/intro email → Reply needed
+     * Question asked → Reply needed  
+     * Request for information → Reply needed
+     * Invoice request → Reply needed with invoice
+   - **CRITICAL: If reply needed, create approval request in Pending_Approval/**
+   - Draft a professional response
+   - Create approval request file with this format:
+
+   ```markdown
+   ---
+   type: approval_request
+   action: send_email
+   to: {sender_email}
+   subject: Re: {original_subject}
+   priority: medium
+   created: {timestamp}
+   expires: {timestamp+24h}
+   status: pending
+   ---
+
+   ## Email Draft
+
+   **To:** {sender}
+   **Subject:** Re: {subject}
+
+   ---
+
+   {Draft email body here}
+
+   ---
+
+   ## Context
+   {Why this reply is needed}
+
+   ## To Approve
+   Move this file to /Approved folder
+
+   ## To Reject  
+   Move this file to /Rejected folder
+   ```
+
+   **For auto-approved tasks:**
+   - Reading/categorizing emails
+   - Creating draft responses
+   - Organizing files
+   - Generating reports
+   - Log the action and move to Done/
+
+   **For approval-required tasks:**
+   - Sending any email or message
+   - Making any payment
+   - Posting to social media
+   - Create detailed approval request in Pending_Approval/
+   - Include all relevant context
+   - Wait for human to move to Approved/
 
 4. **Create Plans for Complex Tasks**
    - If task requires multiple steps, create a Plan.md file in Plans/
@@ -66,6 +117,7 @@ When this skill is invoked:
    - Add recent activity
    - Update pending actions count
    - Update quick stats
+   - List any new approval requests created
 
 6. **Handle Errors Gracefully**
    - If uncertain, create an approval request

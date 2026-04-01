@@ -9,9 +9,17 @@ venv/
 ENV/
 env/
 
+# Node.js (for MCP servers)
+node_modules/
+npm-debug.log
+yarn-error.log
+package-lock.json
+
 # Logs
 *.log
 AI_Employee_Vault/Logs/*.log
+AI_Employee_Vault/Logs/email_actions.json
+AI_Employee_Vault/Logs/processed_emails.json
 
 # Obsidian
 .obsidian/
@@ -20,16 +28,24 @@ AI_Employee_Vault/Logs/*.log
 .env
 .env.local
 
-# Credentials
+# Credentials & Tokens (CRITICAL - Never commit these)
+credentials/
 credentials.json
 token.json
+token.pickle
 *.key
 *.pem
+*.p12
+*.pfx
 
 # OS
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Debug screenshots (LinkedIn automation)
+debug/
+*.png
 
 # IDE
 .vscode/
@@ -42,6 +58,9 @@ desktop.ini
 ~*
 .~*
 
+# Qwen config (local settings)
+
 # Sensitive vault folders (optional - uncomment if needed)
 # AI_Employee_Vault/Pending_Approval/
 # AI_Employee_Vault/Approved/
+# AI_Employee_Vault/Rejected/

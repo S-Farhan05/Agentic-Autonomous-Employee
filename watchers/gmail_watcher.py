@@ -18,7 +18,12 @@ import pickle
 import os.path
 
 # If modifying these scopes, delete the file token.pickle
-SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
+SCOPES = [
+    'https://www.googleapis.com/auth/gmail.readonly',
+    'https://www.googleapis.com/auth/gmail.send',
+    'https://www.googleapis.com/auth/gmail.compose',
+    'https://www.googleapis.com/auth/gmail.modify'
+]
 
 class GmailWatcher:
     """Watcher for Gmail inbox"""
@@ -35,11 +40,29 @@ class GmailWatcher:
         self.needs_action = self.vault_path / 'Needs_Action'
         self.check_interval = check_interval
         self.logger = self._setup_logger()
-        self.processed_ids = set()
         self.service = None
+        
+        # Load processed IDs from file (persistence)
+        self.processed_ids_file = self.vault_path / 'Logs' / 'processed_emails.json'
+        self.processed_ids = self._load_processed_ids()
+
+        # Emails to ignore (promotional, security, automated)
+        self.ignore_senders = [
+            'noreply', 'no-reply', 'security-noreply', 'donotreply',
+            'linkedin', 'facebook', 'twitter', 'instagram',
+            'amazon', 'netflix', 'spotify',
+            'verify', 'verification', 'security', 'noreply'
+        ]
+        
+        self.ignore_subjects = [
+            'PIN', 'verification code', 'verify it\'s you', 'security alert',
+            'promo', 'promotion', 'newsletter', 'unsubscribe',
+            'confirm your email', 'welcome to', 'get started'
+        ]
 
         # Ensure directories exist
         self.needs_action.mkdir(parents=True, exist_ok=True)
+        (self.vault_path / 'Logs').mkdir(parents=True, exist_ok=True)
 
     def _setup_logger(self):
         """Setup logging for Gmail watcher"""
@@ -104,27 +127,91 @@ class GmailWatcher:
         self.service = build('gmail', 'v1', credentials=creds)
         self.logger.info("Gmail authentication successful")
 
+    def _load_processed_ids(self):
+        """Load processed email IDs from file"""
+        import json
+        try:
+            if self.processed_ids_file.exists():
+                with open(self.processed_ids_file, 'r') as f:
+                    data = json.load(f)
+                    self.logger.info(f"Loaded {len(data)} processed email IDs")
+                    return set(data)
+        except Exception as e:
+            self.logger.debug(f"Could not load processed IDs: {e}")
+        return set()
+
+    def _save_processed_ids(self):
+        """Save processed email IDs to file"""
+        import json
+        try:
+            with open(self.processed_ids_file, 'w') as f:
+                json.dump(list(self.processed_ids), f)
+            self.logger.debug(f"Saved {len(self.processed_ids)} processed email IDs")
+        except Exception as e:
+            self.logger.debug(f"Could not save processed IDs: {e}")
+
+    def _should_ignore_email(self, sender, subject):
+        """Check if email should be ignored (promotional, security, etc.)"""
+        sender_lower = sender.lower()
+        subject_lower = subject.lower()
+        
+        # Check sender
+        for ignore in self.ignore_senders:
+            if ignore in sender_lower:
+                self.logger.debug(f"Ignoring email from {sender}: matches '{ignore}'")
+                return True
+        
+        # Check subject
+        for ignore in self.ignore_subjects:
+            if ignore in subject_lower:
+                self.logger.debug(f"Ignoring email with subject '{subject}': matches '{ignore}'")
+                return True
+        
+        return False
+
     def check_for_updates(self):
         """Check Gmail for new important emails"""
         if not self.service:
             self.authenticate()
 
         try:
-            # Query for unread important emails
+            # Query for unread important emails (exclude promotional)
             results = self.service.users().messages().list(
                 userId='me',
-                q='is:unread (is:important OR from:client OR subject:invoice OR subject:urgent)',
-                maxResults=10
+                q='is:unread (-from:noreply -from:security-noreply -subject:PIN -subject:verification)',
+                maxResults=20
             ).execute()
 
             messages = results.get('messages', [])
 
-            # Filter out already processed
-            new_messages = [
-                m for m in messages
-                if m['id'] not in self.processed_ids
-            ]
-
+            # Filter out already processed and promotional emails
+            new_messages = []
+            for m in messages:
+                # Skip if already processed
+                if m['id'] in self.processed_ids:
+                    continue
+                
+                # Get message details to check sender/subject
+                msg = self.service.users().messages().get(
+                    userId='me', id=m['id'], format='metadata',
+                    metadataHeaders=['From', 'Subject']
+                ).execute()
+                
+                headers = {h['name']: h['value'] for h in msg['payload']['headers']}
+                sender = headers.get('From', '')
+                subject = headers.get('Subject', '')
+                
+                # Skip promotional/security emails
+                if self._should_ignore_email(sender, subject):
+                    self.logger.info(f"Skipping promotional/security email: {subject[:50]}")
+                    self.processed_ids.add(m['id'])  # Mark as processed so we don't check again
+                    continue
+                
+                new_messages.append(m)
+            
+            # Save processed IDs after each check
+            self._save_processed_ids()
+            
             return new_messages
 
         except Exception as e:
@@ -201,6 +288,7 @@ Add any notes or observations here.
 
             filepath.write_text(content, encoding='utf-8')
             self.processed_ids.add(message['id'])
+            self._save_processed_ids()  # Save immediately after creating task
 
             self.logger.info(f"Created task for email: {subject}")
             return filepath

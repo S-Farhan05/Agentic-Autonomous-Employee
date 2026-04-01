@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "email": {
+      "command": "node",
+      "args": [
+        "E:\\Farhan-work\\Hackathon\\Agentic-Autonomous-Employee\\mcp-servers\\email-mcp\\index.js"
+      ],
+      "env": {
+        "GMAIL_CREDENTIALS": "E:\\Farhan-work\\Hackathon\\Agentic-Autonomous-Employee\\credentials\\credentials.json"
+      }
+    }
+  }
+}

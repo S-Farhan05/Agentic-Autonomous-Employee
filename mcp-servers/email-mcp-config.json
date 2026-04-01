@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "email": {
+      "command": "npx",
+      "args": ["-y", "@anthropic/email-mcp"],
+      "env": {
+        "GMAIL_CREDENTIALS": "${workspaceFolder}/credentials/credentials.json"
+      }
+    }
+  }
+}
